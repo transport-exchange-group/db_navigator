@@ -1,6 +1,6 @@
 name: db_navigator
 description: A flutter package that provide easy navigation with navigator 2.0.
-version: 0.2.0
+version: 0.3.0
 homepage: https://github.com/bitsydarel/db_navigator
 
 environment:
@@ -9,18 +9,18 @@ environment:
 
 dependencies:
   bdlogging: ">=1.1.1 <2.0.0"
-  collection: ">=1.15.0 <2.0.0"
+  collection: ">=1.17.2 <2.0.0"
   flutter:
     sdk: flutter
-  json_annotation: ">=4.3.0 <6.2.0"
+  json_annotation: ">=4.7.0 <6.2.0"
 
 dev_dependencies:
   build_runner: any
   flutter_code_style: ^2.2.0
   flutter_test:
     sdk: flutter
-  json_serializable: ">=4.3.0"
-  mocktail: ">=0.1.4 <1.0.0"
+  json_serializable: ">=6.4.0"
+  mocktail: ">=1.0.1 <2.0.0"
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

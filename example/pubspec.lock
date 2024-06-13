@@ -55,7 +55,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "0.2.0"
+    version: "0.3.0"
   fake_async:
     dependency: transitive
     description:
@@ -118,10 +118,10 @@ packages:
     dependency: transitive
     description:
       name: json_annotation
-      sha256: "2639efc0237c7b71c6584696c0847ea4e4733ddaf571ae9c79d5295e8ae17272"
+      sha256: "1ce844379ca14835a50d2f019a3099f419082cfdd231cd86a142af94dd5c6bb1"
       url: "https://pub.dev"
     source: hosted
-    version: "4.4.0"
+    version: "4.9.0"
   leak_tracker:
     dependency: transitive
     description:

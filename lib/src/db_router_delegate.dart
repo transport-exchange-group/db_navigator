@@ -347,13 +347,14 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   @override
   void close<T extends Object?>([final T? result]) {
     assert(_pages.isNotEmpty, "there's no page in the stack to close");
-    assert(_pages.length > 1, "You can't remove the only page in the stack");
 
-    final bool popped = _onClosePopCurrentRouteIfNotDBPage();
+    final bool popped = _onClosePopCurrentRouteIfNotDBPage<T>(result);
 
     if (popped) {
       return;
     }
+
+    assert(_pages.length > 1, "You can't remove the only page in the stack");
 
     final DBPage topPage = _pages.removeLast();
 
@@ -520,7 +521,9 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     return true;
   }
 
-  bool _onClosePopCurrentRouteIfNotDBPage() {
+  bool _onClosePopCurrentRouteIfNotDBPage<T extends Object?>([
+    final T? result,
+  ]) {
     final DBPage? lastKnownPage = _pages.lastOrNull;
     Route<dynamic>? navigatorCurrentRoute;
 
@@ -538,7 +541,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
 
     if (navigatorCurrentRoute != null) {
       if (navigatorCurrentRoute?.settings.name != lastKnownPage?.name) {
-        _navigatorKey.currentState?.pop();
+        _navigatorKey.currentState?.pop(result);
         BDLogger().info(
           '${restorationScopeId}DBRouterDelegate'
           '._onClosePopCurrentRouteIfNotDBPage: '

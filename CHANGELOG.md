@@ -1,3 +1,7 @@
+## 0.3.0
+
+* Added support for passing result to navigator.pop for DBRouterDelegate close method.
+
 ## 0.2.0
 
 * Added support for navigator v1, allowing to use the close, closeUntil and closeUntilLast even when
