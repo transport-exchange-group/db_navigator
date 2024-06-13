@@ -8,8 +8,8 @@ environment:
   flutter: ">=3.0.0"
 
 dependencies:
-  collection: ">=1.15.0 <2.0.0"
   bdlogging: ">=1.1.1 <2.0.0"
+  collection: ">=1.15.0 <2.0.0"
   flutter:
     sdk: flutter
   json_annotation: ">=4.3.0 <6.2.0"

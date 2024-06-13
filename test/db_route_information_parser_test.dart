@@ -15,7 +15,7 @@ void main() {
         const Destination(path: Page2.path),
       );
 
-      expect(routeInfo.location, equals(Page2.path));
+      expect(routeInfo.uri.toString(), equals(Page2.path));
     });
   });
 }

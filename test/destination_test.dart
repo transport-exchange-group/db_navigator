@@ -20,7 +20,7 @@ void main() {
           final RouteInformation routeInformation =
               destination.toRouteInformation();
 
-          expect(routeInformation.location, equals(destination.path));
+          expect(routeInformation.uri.toString(), equals(destination.path));
 
           expect(routeInformation.state, isA<DestinationMetadata>());
 

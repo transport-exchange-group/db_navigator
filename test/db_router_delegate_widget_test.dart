@@ -37,7 +37,9 @@ void main() {
           routerDelegate: delegate,
           routeInformationParser: const DBRouteInformationParser(),
           routeInformationProvider: PlatformRouteInformationProvider(
-            initialRouteInformation: const RouteInformation(location: ''),
+            initialRouteInformation: RouteInformation(
+              uri: Uri.parse('/'),
+            ),
           ),
         ),
       );

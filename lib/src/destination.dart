@@ -30,7 +30,7 @@ class Destination {
   ) {
     final Object? argument = routeInformation.state;
     return Destination(
-      path: routeInformation.location,
+      path: routeInformation.uri.toString(),
       metadata: argument is DestinationMetadata
           ? argument
           : DestinationMetadata(arguments: argument),
@@ -39,7 +39,7 @@ class Destination {
 
   /// Convert the current [Destination] to a [RouteInformation].
   RouteInformation toRouteInformation() {
-    return RouteInformation(location: path, state: metadata);
+    return RouteInformation(uri: Uri.parse(path), state: metadata);
   }
 
   /// Convert the current [Destination] to a [RouteSettings].

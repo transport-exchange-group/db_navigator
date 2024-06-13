@@ -24,7 +24,7 @@ class DBRouteInformationParser extends RouteInformationParser<Destination> {
   @override
   RouteInformation restoreRouteInformation(Destination configuration) {
     return RouteInformation(
-      location: configuration.path,
+      uri: Uri.parse(configuration.path),
       state: configuration.metadata,
     );
   }
