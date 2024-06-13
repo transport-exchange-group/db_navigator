@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:bdlogging/bdlogging.dart';
 import 'package:db_navigator/db_navigator.dart';
 import 'package:db_navigator/src/db_navigation_observer.dart';
 import 'package:flutter/foundation.dart';
@@ -138,6 +139,11 @@ class DBRouterDelegate extends RouterDelegate<Destination>
 
   @override
   Future<void> setInitialRoutePath(Destination configuration) async {
+    BDLogger().info(
+      '${restorationScopeId}DBRouterDelegate.setInitialRoutePath: '
+      '$configuration',
+    );
+
     final DBPage? newPage = await pageBuilders.getPage(configuration);
 
     // This is called mostly for deep linking or web navigation
@@ -163,6 +169,11 @@ class DBRouterDelegate extends RouterDelegate<Destination>
 
   @override
   Future<void> setNewRoutePath(Destination configuration) async {
+    BDLogger().info(
+      '${restorationScopeId}DBRouterDelegate.setNewRoutePath: '
+      '$configuration',
+    );
+
     final DBPage? newPage = await pageBuilders.getPage(configuration);
 
     // Since this is called mostly for deep linking or web navigation
@@ -231,7 +242,13 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     Object? arguments,
     List<Destination>? initialPageHistory,
   }) async {
+    BDLogger().info(
+      '${restorationScopeId}DBRouterDelegate.reset: $initialPath, '
+      'newPageBuilders: ${newPageBuilders.length}',
+    );
     assert(newPageBuilders.isNotEmpty, "List of page builders can't be empty");
+
+    _closeAllNonDBPageUntilCurrentDBPage();
 
     _navigationObserver.reset();
 
@@ -331,7 +348,14 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   void close<T extends Object?>([final T? result]) {
     assert(_pages.isNotEmpty, "there's no page in the stack to close");
     assert(_pages.length > 1, "You can't remove the only page in the stack");
-    final DBPage topPage = _pages.removeAt(_pages.length - 1);
+
+    final bool popped = _onClosePopCurrentRouteIfNotDBPage();
+
+    if (popped) {
+      return;
+    }
+
+    final DBPage topPage = _pages.removeLast();
 
     final Completer<Object?>? tracker = _popResultTracker.remove(
       topPage.destination.path,
@@ -347,6 +371,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   @override
   void closeUntilLast({Map<String, Object?>? resultMap}) {
     assert(_pages.isNotEmpty, "there's no page in the stack to close");
+
+    _closeAllNonDBPageUntilCurrentDBPage();
 
     if (_pages.length == 1) {
       return;
@@ -387,6 +413,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
       "$location is the top most, so it's make no sense to use closeUntil, "
       'use close method to close a single location',
     );
+
+    _closeAllNonDBPageUntilCurrentDBPage();
 
     final List<DBPage> pagesToClose = _pages.sublist(locationIndex + 1);
     _pages.removeRange(locationIndex + 1, _pages.length);
@@ -490,6 +518,69 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     }
 
     return true;
+  }
+
+  bool _onClosePopCurrentRouteIfNotDBPage() {
+    final DBPage? lastKnownPage = _pages.lastOrNull;
+    Route<dynamic>? navigatorCurrentRoute;
+
+    _navigatorKey.currentState?.popUntil((Route<dynamic> route) {
+      navigatorCurrentRoute = route;
+      return true;
+    });
+
+    BDLogger().info(
+      '${restorationScopeId}DBRouterDelegate'
+      '._onClosePopCurrentRouteIfNotDBPage: '
+      '\nlastKnownPage is ${lastKnownPage?.name}'
+      '\ncurrentRoute is ${navigatorCurrentRoute?.settings.name}',
+    );
+
+    if (navigatorCurrentRoute != null) {
+      if (navigatorCurrentRoute?.settings.name != lastKnownPage?.name) {
+        _navigatorKey.currentState?.pop();
+        BDLogger().info(
+          '${restorationScopeId}DBRouterDelegate'
+          '._onClosePopCurrentRouteIfNotDBPage: '
+          'popped route ${navigatorCurrentRoute?.settings.name}',
+        );
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  void _closeAllNonDBPageUntilCurrentDBPage() {
+    final DBPage? lastKnownPage = _pages.lastOrNull;
+
+    BDLogger().info(
+      '${restorationScopeId}DBRouterDelegate'
+      '._closeAllNonDBPageUntilCurrentDBPage: lastKnownPage: $lastKnownPage',
+    );
+
+    _navigatorKey.currentState?.popUntil((Route<dynamic> route) {
+      if (route.settings.name == lastKnownPage?.name) {
+        BDLogger().info(
+          '${restorationScopeId}DBRouterDelegate'
+          '._closeAllNonDBPageUntilCurrentDBPage: '
+          'found lastKnownPage stopping popUntil',
+        );
+        return true;
+      }
+
+      BDLogger().info(
+        '${restorationScopeId}DBRouterDelegate'
+        '._closeAllNonDBPageUntilCurrentDBPage: '
+        'popping route: ${route.settings.name}',
+      );
+      return false;
+    });
+
+    BDLogger().info(
+      '${restorationScopeId}DBRouterDelegate'
+      '._closeAllNonDBPageUntilCurrentDBPage: completed popUntil',
+    );
   }
 }
 

@@ -13,6 +13,13 @@ import 'package:mocktail/mocktail.dart';
 import 'utils.dart';
 
 void main() {
+  late GlobalKey<NavigatorState> navigatorKey;
+
+  setUp(() {
+    navigatorKey = _MockNavigatorKey();
+    when(() => navigatorKey.currentState).thenReturn(null);
+  });
+
   group(
     'instantiation',
     () {
@@ -80,16 +87,15 @@ void main() {
         'navigatorKey getter should return exact same $GlobalKey '
         'if there was one assigned to navigatorKey parameter',
         () {
-          final GlobalKey<NavigatorState> navigatorKey =
-              GlobalKey<NavigatorState>();
+          final GlobalKey<NavigatorState> navKey = GlobalKey<NavigatorState>();
 
           final DBRouterDelegate routerDelegate = DBRouterDelegate(
             pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
             initialPage: TestPageBuilder.initialPage,
-            navigatorKey: navigatorKey,
+            navigatorKey: navKey,
           );
 
-          expect(routerDelegate.navigatorKey, equals(navigatorKey));
+          expect(routerDelegate.navigatorKey, equals(navKey));
         },
       );
     },
@@ -224,7 +230,7 @@ void main() {
         final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
           <DBPage>[],
           <DBPageBuilder>[pageBuilder],
-          GlobalKey<NavigatorState>(),
+          navigatorKey,
           trackers,
           DBNavigationObserver(),
           <NavigatorObserver>[],
@@ -245,7 +251,7 @@ void main() {
         final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
           <DBPage>[TestPageBuilder.initialPage],
           <DBPageBuilder>[pageBuilder],
-          GlobalKey<NavigatorState>(),
+          navigatorKey,
           trackers,
           DBNavigationObserver(),
           <NavigatorObserver>[],
@@ -272,7 +278,7 @@ void main() {
           final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
             <DBPage>[page2, TestPageBuilder.initialPage],
             <DBPageBuilder>[pageBuilder],
-            GlobalKey<NavigatorState>(),
+            navigatorKey,
             trackers,
             DBNavigationObserver(),
             <NavigatorObserver>[],
@@ -372,7 +378,7 @@ void main() {
           final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
             <DBPage>[],
             <DBPageBuilder>[const TestPageBuilder()],
-            GlobalKey<NavigatorState>(),
+            navigatorKey,
             <String, Completer<Object?>>{},
             DBNavigationObserver(),
             <NavigatorObserver>[],
@@ -399,7 +405,7 @@ void main() {
           final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
             <DBPage>[TestPageBuilder.initialPage, page2],
             <DBPageBuilder>[const TestPageBuilder()],
-            GlobalKey<NavigatorState>(),
+            navigatorKey,
             trackers,
             DBNavigationObserver(),
             <NavigatorObserver>[],
@@ -430,6 +436,7 @@ void main() {
           pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
           initialPage: TestPageBuilder.initialPage,
           popResultTracker: trackers,
+          navigatorKey: navigatorKey,
         );
 
         final List<DBPageBuilder> previousPageBuilders =
@@ -457,6 +464,7 @@ void main() {
       final DBRouterDelegate routerDelegate = DBRouterDelegate(
         pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
         initialPage: TestPageBuilder.initialPage,
+        navigatorKey: navigatorKey,
       );
 
       expect(routerDelegate.pages, contains(TestPageBuilder.initialPage));
@@ -488,6 +496,7 @@ void main() {
           pageBuilders: <DBPageBuilder>[
             const WidgetPageBuilder(child: Placeholder()),
           ],
+          navigatorKey: navigatorKey,
         );
 
         expect(routerDelegate.pages, contains(initialPage));
@@ -517,7 +526,7 @@ void main() {
         final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
           <DBPage>[],
           <DBPageBuilder>[const TestPageBuilder()],
-          GlobalKey<NavigatorState>(),
+          navigatorKey,
           <String, Completer<Object?>>{},
           DBNavigationObserver(),
           <NavigatorObserver>[],
@@ -541,7 +550,7 @@ void main() {
         expect(routerDelegate.pages, hasLength(equals(1)));
 
         expect(
-              () => routerDelegate.closeUntil(location: Page2.path),
+          () => routerDelegate.closeUntil(location: Page2.path),
           throwsA(isA<DBRouterDelegateCantClosePageException>()),
         );
       });
@@ -557,7 +566,7 @@ void main() {
           final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
             <DBPage>[TestPageBuilder.initialPage, page2],
             <DBPageBuilder>[pageBuilder],
-            GlobalKey<NavigatorState>(),
+            navigatorKey,
             <String, Completer<Object?>>{},
             DBNavigationObserver(),
             <NavigatorObserver>[],
@@ -567,7 +576,7 @@ void main() {
           expect(routerDelegate.pages, hasLength(2));
 
           expect(
-                () => routerDelegate.closeUntil(location: Page3.path),
+            () => routerDelegate.closeUntil(location: Page3.path),
             throwsA(isA<DBRouterDelegateCantClosePageException>()),
           );
         },
@@ -587,7 +596,7 @@ void main() {
           final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
             <DBPage>[TestPageBuilder.initialPage, page2, page3],
             <DBPageBuilder>[pageBuilder],
-            GlobalKey<NavigatorState>(),
+            navigatorKey,
             <String, Completer<Object?>>{},
             DBNavigationObserver(),
             <NavigatorObserver>[],
@@ -620,7 +629,7 @@ void main() {
           final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
             <DBPage>[TestPageBuilder.initialPage, page2, page3, page4],
             <DBPageBuilder>[pageBuilder],
-            GlobalKey<NavigatorState>(),
+            navigatorKey,
             <String, Completer<Object?>>{},
             DBNavigationObserver(),
             <NavigatorObserver>[],
@@ -647,7 +656,7 @@ void main() {
       final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
         <DBPage>[],
         <DBPageBuilder>[const TestPageBuilder()],
-        GlobalKey<NavigatorState>(),
+        navigatorKey,
         <String, Completer<Object?>>{},
         DBNavigationObserver(),
         <NavigatorObserver>[],
@@ -670,7 +679,7 @@ void main() {
         final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
           <DBPage>[TestPageBuilder.initialPage],
           <DBPageBuilder>[pageBuilder],
-          GlobalKey<NavigatorState>(),
+          navigatorKey,
           <String, Completer<Object?>>{},
           DBNavigationObserver(),
           <NavigatorObserver>[],
@@ -707,7 +716,7 @@ void main() {
         final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
           <DBPage>[TestPageBuilder.initialPage, page2, page3, page4],
           <DBPageBuilder>[pageBuilder],
-          GlobalKey<NavigatorState>(),
+          navigatorKey,
           <String, Completer<Object?>>{},
           DBNavigationObserver(),
           <NavigatorObserver>[],
@@ -730,3 +739,5 @@ void main() {
 }
 
 class _MockRoute extends Mock implements Route<Object?> {}
+
+class _MockNavigatorKey extends Mock implements GlobalKey<NavigatorState> {}
