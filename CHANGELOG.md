@@ -1,4 +1,4 @@
-## 0.3.0
+## 1.0.0
 
 * Added support for passing result to navigator.pop for DBRouterDelegate close method.
 
