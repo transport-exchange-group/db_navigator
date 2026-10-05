@@ -20,6 +20,16 @@ Research (2026-10-05) compared three directions:
 
 Baseline evidence from TEGFlutterApp today: 34 page builders (largely copy-pasted), 71 path constants, 22 argument classes, 34 forced casts of untyped arguments, and 3–4 files / ~40–60 lines touched to add one route.
 
+## Clarifications
+
+### Session 2026-10-05
+
+- Q: Which argument types should the generator treat as serialisable (restorable, deep-linkable)? → A: Primitives (`String`, `int`, `double`, `bool`), enums, `DateTime`, lists/maps of these, and any class with `toJson()` + `fromJson()`.
+- Q: When restoring with an in-memory-only route on the stack, what does the restored stack look like? → A: Restore up to the first in-memory-only route; drop it and everything above it.
+- Q: What happens on a deep link to an unknown path? → A: App may supply a "not found" route; if none is supplied, the current stack is kept and a warning is logged.
+- Q: What does the caller get when a legacy-API page closes with a mistyped result? → A: Debug: assertion naming the route and both types. Release: caller gets "no result" and a warning is logged.
+- Q: Where is a route declared? → A: As an annotation on the page widget (path, result type, feature name); the page constructor's parameters are the route's arguments.
+
 ## User Scenarios & Testing *(mandatory)*
 
 The "user" throughout is an app developer consuming db_navigator.
@@ -104,21 +114,22 @@ When a route's arguments cannot be saved for state restoration or deep links (e.
 
 ### Edge Cases
 
-- App restored while routes with in-memory-only arguments are on the stack: the restored stack must omit or fall back for those routes in a documented way, never crash.
+- App restored while routes with in-memory-only arguments are on the stack: the stack is restored up to the first in-memory-only route, which is dropped along with every route above it; it never crashes.
 
 - Same route pushed twice in one stack: both callers must receive their own results (today the first never completes).
 - Router reset then disposed: must not throw (today it does).
 - Generation run on a route whose page constructor changed: stale generated code must fail to compile, not misbehave at runtime.
 - Release builds with obfuscation: argument serialisation must not rely on runtime type names.
-- Deep link to an unknown path: a defined fallback is used instead of silently ignoring it.
+- Deep link to an unknown path: the app's "not found" route is shown if supplied; otherwise the current stack is kept and a warning is logged (never silently ignored).
 - Nullable argument vs optional argument: both are expressible and distinct.
 - Route with no arguments and no result: still gets a generated typed entry point.
+- Legacy-API page closed with a result of the wrong type: debug builds fail an assertion naming the route and both types; release builds return "no result" to the caller and log a warning.
 
 ## Requirements *(mandatory)*
 
 ### Functional Requirements
 
-- **FR-001**: The package MUST let a developer declare a route's path, arguments (names, types, required/optional, defaults) and result type in a single declaration.
+- **FR-001**: The package MUST let a developer declare a route's path, result type and feature name as an annotation on the page widget; the page constructor's parameters (names, types, required/optional, defaults) MUST be the route's arguments.
 - **FR-002**: The package MUST generate, from each declaration, a typed navigation entry point whose arguments and result are checked at compile time.
 - **FR-003**: The package MUST generate argument serialisation and its registration for each route; developers MUST NOT write manual registration or casts for generated routes.
 - **FR-004**: The package MUST generate, per feature, a single registrable unit that replaces the hand-written page builder, usable in both root and nested navigators.
@@ -126,19 +137,20 @@ When a route's arguments cannot be saved for state restoration or deep links (e.
 - **FR-006**: The existing public navigation API MUST keep working unchanged in the release that introduces generation; superseded APIs MAY be marked deprecated but MUST NOT be removed in that release.
 - **FR-007**: Generated and legacy routes MUST interoperate in the same navigator, including results.
 - **FR-008**: Argument serialisation MUST NOT depend on runtime type names, so it works with obfuscated release builds.
-- **FR-009**: Routes with non-serialisable arguments (e.g. callbacks, services) MUST be allowed, and MUST be marked by the generator as in-memory only: they are excluded from state restoration and deep links, and this is stated in the generated output and the migration guide.
+- **FR-009**: Routes with non-serialisable arguments (any type outside the serialisable set in Key Entities → Route arguments, e.g. callbacks, services) MUST be allowed, and MUST be marked by the generator as in-memory only: they are excluded from state restoration (restoration stops at the first such route) and deep links, and this is stated in the generated output and the migration guide.
 - **FR-010**: The package MUST ship a migration guide meeting User Story 4, scenario 3, plus an updated README with a quick-start for typed routes.
 - **FR-011**: The example app MUST demonstrate every generated-route capability, and the generator MUST have automated tests over its output.
-- **FR-012**: This spec MUST resolve the known result-handling defects: results lost when the same path is pushed twice, crash on dispose after reset, `closeUntilLast` ignoring supplied results, and runtime crashes from mistyped results.
+- **FR-012**: This spec MUST resolve the known result-handling defects: results lost when the same path is pushed twice, crash on dispose after reset, `closeUntilLast` ignoring supplied results, and runtime crashes from mistyped results. A mistyped result MUST fail a debug assertion naming the route, expected and actual types; in release builds the caller MUST receive "no result" and a warning MUST be logged.
 - **FR-013**: The work MUST be based on `release/0.2.0` (package v1.0.0), the line TEGFlutterApp consumes; the resulting release MUST be versioned above 1.0.0.
 - **FR-014**: The package's declared minimum Flutter/Dart versions MUST match the APIs it uses and MUST NOT exceed the version TEGFlutterApp is pinned to.
+- **FR-015**: The package MUST let the app supply an optional "not found" route for unknown deep-link paths; when none is supplied, the current stack MUST be kept and a warning logged.
 
 ### Key Entities
 
-- **Route declaration**: A developer-authored description of one route — path, arguments, result type, optional presentation (transition, modal).
+- **Route declaration**: An annotation on a page widget describing one route — path, result type, feature name, optional presentation (transition, modal); arguments come from the page constructor.
 - **Typed route**: The generated, compile-time-checked entry point for navigating to one route and awaiting its result.
-- **Feature route group**: The generated registrable unit bundling one feature's routes, scope name and dependency setup.
-- **Route arguments**: The values a route needs; either serialisable (restorable, deep-linkable) or in-memory only.
+- **Feature route group**: The generated registrable unit bundling all routes that share a feature name, plus that feature's scope name and dependency setup.
+- **Route arguments**: The values a route needs; either serialisable (restorable, deep-linkable) or in-memory only. Serialisable = primitives (`String`, `int`, `double`, `bool`), enums, `DateTime`, lists/maps of these, or a class with `toJson()` + `fromJson()`; anything else is in-memory only.
 - **Migration guide**: The document mapping every current usage pattern to its generated equivalent.
 
 ## Success Criteria *(mandatory)*
@@ -159,4 +171,4 @@ When a route's arguments cannot be saved for state restoration or deep links (e.
 - Generation dependencies are development-only; no significant new runtime dependency is added.
 - The new capability ships as an additive minor release; removal of deprecated APIs is a later major.
 - Out of scope for this spec (candidate follow-ups): route guards/redirects, path and query parameter parsing, testing helpers / fake navigator, nested-navigation widget fixes, and migrating TEGFlutterApp itself.
-- The 404/unknown-deep-link fallback is limited to a defined, documented default behaviour; richer handling belongs with guards/redirects.
+- The unknown-deep-link fallback is limited to FR-015; richer handling belongs with guards/redirects.
