@@ -20,7 +20,7 @@ Router direction (own generator vs auto_route / go_router) was settled in the sp
 ## R3 — Generation pipeline shape
 
 - **Decision**: Two builders.
-  1. **`db_route`** (per library, `SharedPartBuilder` → `*.g.dart`): for each `@DBRoute` widget, emits the typed route class and its argument codec into the page's part file, plus a small JSON descriptor `*.db_route.json` (path, feature, class name, library URI, entry flag, restorable flag).
+  1. **`db_route`** (per library, `SharedPartBuilder` → `*.g.dart`): for each `@DBRoute` widget, emits the typed route class and its argument codec into the page's part file. A sibling **`db_route_descriptor`** builder (plain `Builder`; a `SharedPartBuilder` can only emit the part) writes a small JSON descriptor `*.db_route.json` (path, feature, class name, library URI, entry flag, restorable flag).
   2. **`db_feature_routes`** (aggregate, input `lib/$lib$`, output `lib/db_routes.g.dart`): reads all descriptors, validates (duplicate paths, one entry per feature), and emits one `DBFeatureRoutes` subclass per feature.
 - **Rationale**: Types stay in the per-library part, where they are already resolved — no type serialisation across phases. The aggregate only needs names and URIs, so it is cheap (SC-007) and is the one place that sees every path (FR-005 duplicate detection, US3-AS2). Same two-phase pattern used by injectable and auto_route.
 - **Alternatives**:

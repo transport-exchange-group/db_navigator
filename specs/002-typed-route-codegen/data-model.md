@@ -69,7 +69,7 @@ The const record each typed route exposes as `static const definition`, consumed
 | `scopeName` | the feature name |
 | `initialDestination` | the entry route's path |
 | `definitions` | `List<DBRouteDefinition>` — every route in the feature |
-| `onEntered` / `onExited` | optional `void Function(String scopeName)` passed to the `const` constructor |
+| `onEntered` / `onExited` | optional `void Function(String scopeName)` passed to the `const` constructor; `onEntered` is where the app runs the feature's dependency setup |
 | `supportRoute(d)` | `d.path` is in `definitions` |
 | `buildPage(d)` | `arguments is DBTypedRoute` → use it; `is Map` → `decode`; `null` → `defaultRoute`; otherwise throw `PageNotFoundException` |
 
@@ -98,7 +98,7 @@ One file per page library, holding a list of descriptors. Not checked in (build 
 | `complete(DBPage page, Object? result)` | no-op if absent or already completed |
 | `completeAll()` | completes pending with `null`, then clears |
 
-Replaces `Map<String, Completer<Object?>> _popResultTracker`. The `@visibleForTesting popResultTracker` constructor parameter stays, so SC-004 holds.
+Replaces `Map<String, Completer<Object?>> _popResultTracker`. The `@visibleForTesting popResultTracker` constructor parameter changes type to `PopResultTracker?`: a per-path map cannot hold two pushes of the same path. Test-only, so app code is unaffected (SC-004); noted in CHANGELOG.
 
 ## State transitions — navigation stack on restore
 

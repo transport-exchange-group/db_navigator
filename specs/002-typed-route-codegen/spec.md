@@ -79,7 +79,7 @@ A developer groups a feature's routes and registers them with the router as one 
 
 1. **Given** a feature with several declared routes, **When** generation runs, **Then** a single registrable unit is produced for that feature.
 2. **Given** two features declare the same path, **When** generation runs, **Then** it fails with a message naming both declarations.
-3. **Given** a developer needs custom per-feature behaviour (scope name, dependency setup, page transition), **Then** it can be expressed on the declaration without writing a full builder.
+3. **Given** a developer needs custom per-feature behaviour (dependency setup, scope enter/exit logging, page transition), **Then** it can be expressed without writing a full builder: page transition on the declaration, dependency setup and logging in the feature unit's scope-entered/exited callbacks.
 
 ---
 
@@ -147,9 +147,9 @@ When a route's arguments cannot be saved for state restoration or deep links (e.
 
 ### Key Entities
 
-- **Route declaration**: An annotation on a page widget describing one route — path, result type, feature name, optional presentation (transition, modal); arguments come from the page constructor.
+- **Route declaration**: An annotation on a page widget describing one route — path, result type, feature name, optional page transition; arguments come from the page constructor.
 - **Typed route**: The generated, compile-time-checked entry point for navigating to one route and awaiting its result.
-- **Feature route group**: The generated registrable unit bundling all routes that share a feature name, plus that feature's scope name and dependency setup.
+- **Feature route group**: The generated registrable unit bundling all routes that share a feature name, plus that feature's scope name (the feature name) and scope-entered/exited callbacks, which host dependency setup.
 - **Route arguments**: The values a route needs; either serialisable (restorable, deep-linkable) or in-memory only. Serialisable = primitives (`String`, `int`, `double`, `bool`), enums, `DateTime`, lists/maps of these, or a class with `toJson()` + `fromJson()`; anything else is in-memory only.
 - **Migration guide**: The document mapping every current usage pattern to its generated equivalent.
 

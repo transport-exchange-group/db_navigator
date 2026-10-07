@@ -45,7 +45,7 @@ abstract class DBFeatureRoutes extends ScopedPageBuilder {
 
 | Symbol | Change |
 |--------|--------|
-| `DBRouterDelegate(...)` | new optional `notFoundPageFactory: DBPage Function(Destination)?` |
+| `DBRouterDelegate(...)` | new optional `notFoundPageFactory: DBPage Function(Destination)?`; `@visibleForTesting popResultTracker` type `Map<String, Completer<Object?>>?` → `PopResultTracker?` (test-only) |
 | `DBRouterDelegate.navigateTo<T>` | wrong-typed result → debug assert (route + expected + actual type); release → `null` + warning. Previously a `TypeError`. |
 | `DBRouterDelegate.close` / `closeUntil` / `closeUntilLast` | results delivered per pushed page, not per path; `closeUntilLast` honours `resultMap` |
 | `DBRouterDelegate.dispose` | safe after `reset` |
