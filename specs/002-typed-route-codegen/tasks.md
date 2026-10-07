@@ -160,8 +160,8 @@ description: "Task list for Typed Route Code Generation"
 ### Implementation for User Story 4
 
 - [X] T056 [US4] Example: keep the legacy feature (`example/lib/src/home_page_builder.dart`, `example/lib/src/ui/screen_page_builder.dart`) unchanged; add a push from `ProfileScreen` to a legacy route and from the legacy screen to `ConfirmLogoutRoute`, awaiting results
-- [ ] T057 [US4] Write `doc/migration-guide.md`: setup (from contracts/build-config.md); before/after for plain route, route with arguments, modal / bottom sheet (typed `destination` + app-owned `showModal` overload — research R10), nested / tab navigation, callback / service arguments (in-memory only — FR-009); `AnalyticsPageBuilder` and per-feature dependency setup → `onEntered`/`onExited`; `fadeInFadeOutPage` → `pageFactory`; per-feature checklist; verification steps; rollback
-- [ ] T058 [P] [US4] Add typed-routes quick-start to `README.md` (install, annotate, generate, register, push/await)
+- [X] T057 [US4] Write `doc/migration-guide.md`: setup (from contracts/build-config.md); before/after for plain route, route with arguments, modal / bottom sheet (typed `destination` + app-owned `showModal` overload — research R10), nested / tab navigation, callback / service arguments (in-memory only — FR-009); `AnalyticsPageBuilder` and per-feature dependency setup → `onEntered`/`onExited`; `fadeInFadeOutPage` → `pageFactory`; per-feature checklist; verification steps; rollback
+- [X] T058 [P] [US4] Add typed-routes quick-start to `README.md` (install, annotate, generate, register, push/await)
 - [ ] T059 [US4] SC-004 check per quickstart §4: point TEGFlutterApp's `db_navigator` at this branch with no other edits, run `flutter pub get && flutter analyze && flutter test`, record result (any test passing `popResultTracker:` is an expected, test-only break — list them), revert the pubspec
 - [ ] T060 [US4] SC-005 dry run: a developer new to the package migrates one example feature using only `doc/migration-guide.md`; time it (<30 min) and fold gaps back into the guide — **blocker: needs a named volunteer before T057 finishes**
 
@@ -201,10 +201,10 @@ description: "Task list for Typed Route Code Generation"
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T075 Bump root `pubspec.yaml` to `1.1.0`; add `CHANGELOG.md` 1.1.0 entry: typed routes, generator package, FR-012 fixes, not-found fallback, the restoration-state behaviour change (object → JSON), and the test-only `popResultTracker` parameter type change (`Map` → `PopResultTracker`)
+- [X] T075 Bump root `pubspec.yaml` to `1.1.0`; add `CHANGELOG.md` 1.1.0 entry: typed routes, generator package, FR-012 fixes, not-found fallback, the restoration-state behaviour change (object → JSON), and the test-only `popResultTracker` parameter type change (`Map` → `PopResultTracker`)
 - [ ] T076 [P] SC-007: time a clean `dart run build_runner build --delete-conflicting-outputs` in `example/` with and without `db_navigator_generator`; confirm <10% extra
-- [ ] T077 Run quickstart §1–3 gates: `flutter analyze` + `flutter test` (root, `example/`), `dart analyze` + `dart test` (`db_navigator_generator/`); SC-002: `grep -rnE '\bas [A-Z]' example/lib` finds no argument/result casts in code using generated routes
-- [ ] T078 Constitution IV sweep: no doc comments beyond the public-API exception; only the FR-009 comment in generated output
+- [X] T077 Run quickstart §1–3 gates: `flutter analyze` + `flutter test` (root, `example/`), `dart analyze` + `dart test` (`db_navigator_generator/`); SC-002: `grep -rnE '\bas [A-Z]' example/lib` finds no argument/result casts in code using generated routes
+- [X] T078 Constitution IV sweep: no doc comments beyond the public-API exception; only the FR-009 comment in generated output
 - [ ] T079 Code review (pr-review-toolkit:code-reviewer) and security review of the branch diff; fix CRITICAL/HIGH
 - [ ] T080 Open PR against `release/0.2.0` (not `master`)
 - [ ] T081 [P] Raise follow-up ticket: port generator to analyzer 8 element model once TEGFlutterApp upgrades freezed
