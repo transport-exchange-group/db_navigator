@@ -32,12 +32,11 @@ class DBRouteInformationParser extends RouteInformationParser<Destination> {
     final int firstUnrestorable = stack.indexWhere(
       (Destination destination) => !_isRestorable(destination),
     );
-    final List<Destination> restorable = firstUnrestorable < 0
-        ? stack
-        : stack.sublist(0, firstUnrestorable);
+    final List<Destination> restorable =
+        firstUnrestorable < 0 ? stack : stack.sublist(0, firstUnrestorable);
 
     if (restorable.isEmpty) {
-      return RouteInformation(uri: Uri.parse(configuration.path));
+      return RouteInformation(uri: Uri.parse('/'));
     }
 
     final Destination top = restorable.last;
@@ -65,8 +64,8 @@ class DBRouteInformationParser extends RouteInformationParser<Destination> {
   bool _isRestorable(Destination destination) {
     final Object? arguments = destination.metadata.arguments;
 
-    if (arguments is DBTypedRoute<Object?>) {
-      return arguments.isRestorable;
+    if (arguments is DBTypedRoute<Object?> && !arguments.isRestorable) {
+      return false;
     }
 
     return _isJson(DestinationArgumentConverter.pojoToJson(arguments));

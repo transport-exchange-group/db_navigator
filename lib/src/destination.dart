@@ -33,14 +33,31 @@ class Destination {
 
     if (state is DestinationMetadata) {
       metadata = state;
-    } else if (state is Map<Object?, Object?>) {
-      metadata = DestinationMetadata.fromJson(_jsonMap(state));
     } else {
-      metadata = DestinationMetadata(arguments: state);
+      metadata =
+          _metadataFromJson(state) ?? DestinationMetadata(arguments: state);
     }
 
     return Destination(
-        path: routeInformation.uri.toString(), metadata: metadata);
+      path: routeInformation.uri.toString(),
+      metadata: metadata,
+    );
+  }
+
+  static const Set<String> _metadataKeys = <String>{'arguments', 'history'};
+
+  static DestinationMetadata? _metadataFromJson(Object? state) {
+    if (state is! Map<Object?, Object?> ||
+        state.isEmpty ||
+        !state.keys.every(_metadataKeys.contains)) {
+      return null;
+    }
+
+    try {
+      return DestinationMetadata.fromJson(_jsonMap(state));
+    } on Object {
+      return null;
+    }
   }
 
   // The platform codec decodes restored maps as Map<Object?, Object?>.

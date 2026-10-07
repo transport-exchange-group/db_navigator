@@ -205,7 +205,12 @@ DBRouterDelegate(
 
 Without it, an unknown path (or arguments that fail to decode) keeps the current stack and logs a `BDLogger` warning.
 
-## 10. Per-feature checklist
+## 10. Known generator limits
+
+- **Import prefixes**: argument and result types from `import '...' as m;` are emitted without the prefix and fail to compile. Import those types without a prefix in the page file.
+- **Default values** are copied as written. A default that refers to a private or static member of the widget (`this.padding = _defaultPadding`) won't resolve in the generated class; use a literal or a top-level constant.
+
+## 11. Per-feature checklist
 
 1. Add `part '<file>.g.dart';` and `@DBRoute(...)` to every page in the feature.
 2. Mark exactly one page `isFeatureEntry: true` (single-page features are their own entry).
@@ -216,7 +221,7 @@ Without it, an unknown path (or arguments that fail to decode) keeps the current
 7. Delete the routing map, the page builder and the `location` constants.
 8. Move scope logic (`AnalyticsPageBuilder`, DI setup) into `onEntered` / `onExited`.
 
-## 11. Verify
+## 12. Verify
 
 ```bash
 dart run build_runner build --delete-conflicting-outputs
@@ -226,6 +231,6 @@ flutter test
 
 Then, manually: open every route, check arguments show, results return, system back returns `null`, and a deep link to each path opens (or shows not-found for in-memory routes).
 
-## 12. Roll back
+## 13. Roll back
 
 Each feature migrates independently. To roll one back, revert its commit: the legacy builder and map return, and the generated `<Feature>Routes` disappears on the next `build_runner` run. Other migrated features are unaffected.

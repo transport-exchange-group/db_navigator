@@ -205,7 +205,7 @@ description: "Task list for Typed Route Code Generation"
 - [ ] T076 [P] SC-007: time a clean `dart run build_runner build --delete-conflicting-outputs` in `example/` with and without `db_navigator_generator`; confirm <10% extra
 - [X] T077 Run quickstart §1–3 gates: `flutter analyze` + `flutter test` (root, `example/`), `dart analyze` + `dart test` (`db_navigator_generator/`); SC-002: `grep -rnE '\bas [A-Z]' example/lib` finds no argument/result casts in code using generated routes
 - [X] T078 Constitution IV sweep: no doc comments beyond the public-API exception; only the FR-009 comment in generated output
-- [ ] T079 Code review (pr-review-toolkit:code-reviewer) and security review of the branch diff; fix CRITICAL/HIGH
+- [X] T079 Code review (pr-review-toolkit:code-reviewer) and security review of the branch diff; fix CRITICAL/HIGH
 - [ ] T080 Open PR against `release/0.2.0` (not `master`)
 - [ ] T081 [P] Raise follow-up ticket: port generator to analyzer 8 element model once TEGFlutterApp upgrades freezed
 

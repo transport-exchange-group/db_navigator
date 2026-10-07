@@ -34,7 +34,7 @@ class ProfileRoute extends DBTypedRoute<void> {
 
   static ProfileRoute fromJson(Map<String, Object?> json) => ProfileRoute(
       userId: json['userId'] as String,
-      visits: (json['visits'] as num).toInt());
+      visits: json.containsKey('visits') ? (json['visits'] as num).toInt() : 0);
 
   @override
   Map<String, Object?>? toJson() =>

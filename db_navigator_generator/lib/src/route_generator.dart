@@ -164,7 +164,7 @@ class RouteGenerator extends Generator {
     final String body = route.isRestorable
         ? '${route.routeClass}(${_invocationArguments(
             route.arguments,
-            (RouteArgument a) => decodeArgument(a.type, "json['${a.name}']"),
+            _decodeWithDefault,
           )})'
         : "throw UnsupportedError('${route.routeClass} is in-memory only')";
 
@@ -179,6 +179,16 @@ class RouteGenerator extends Generator {
         ..lambda = true
         ..body = Code(body),
     );
+  }
+
+  String _decodeWithDefault(RouteArgument argument) {
+    final String decoded =
+        decodeArgument(argument.type, "json['${argument.name}']");
+    final String? defaultValue = argument.defaultValueCode;
+
+    return defaultValue == null
+        ? decoded
+        : "json.containsKey('${argument.name}') ? $decoded : $defaultValue";
   }
 
   Method _defaultRoute(RouteDeclaration route) {

@@ -88,13 +88,27 @@ void restorationTests() {
       expect(info.uri.toString(), Page1.path);
     });
 
-    test('keeps only the path when the first destination is in-memory', () {
+    test('restores the root when the first destination is in-memory', () {
       final RouteInformation info = parser.restoreRouteInformation(
-        CallbackRoute(onDone: () {}).destination,
+        stack(<Destination>[
+          CallbackRoute(onDone: () {}).destination,
+          const GreetingRoute(name: 'Ada').destination,
+        ]),
       );
 
-      expect(info.uri.toString(), CallbackRoute.path);
+      expect(info.uri.toString(), '/');
       expect(info.state, isNull);
+    });
+
+    test('cuts a typed route whose toJson is not plain JSON', () {
+      final RouteInformation info = parser.restoreRouteInformation(
+        stack(<Destination>[
+          const Destination(path: Page1.path),
+          const NestedObjectRoute().destination,
+        ]),
+      );
+
+      expect(info.uri.toString(), Page1.path);
     });
   });
 }

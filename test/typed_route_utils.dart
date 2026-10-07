@@ -132,6 +132,22 @@ class CallbackRoute extends DBTypedRoute<void> {
   Widget buildWidget() => const SizedBox();
 }
 
+class NestedObjectRoute extends DBTypedRoute<void> {
+  const NestedObjectRoute();
+
+  @override
+  String get location => '/nested-object';
+
+  @override
+  bool get isRestorable => true;
+
+  @override
+  Map<String, Object?> toJson() => <String, Object?>{'at': Duration.zero};
+
+  @override
+  Widget buildWidget() => const SizedBox();
+}
+
 DBPage fadePage(Destination destination, Widget child) {
   return DBMaterialPage(
     key: ValueKey<String>('fade${destination.path}'),

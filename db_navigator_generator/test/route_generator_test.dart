@@ -112,7 +112,7 @@ void main() {
           "driver: Driver.fromJson(json['driver'] as Map<String, dynamic>)",
         ),
       );
-      expect(output, contains("note: json['note'] as String,"));
+      expect(output, contains("json.containsKey('note')"));
     });
 
     test('builds the page widget from the fields', () {
@@ -177,6 +177,21 @@ void main() {
       expect(required, contains("note: json['note'] as String?"));
       expect(optional, contains("this.note = ''"));
       expect(optional, isNot(contains('required this.note')));
+    });
+
+    test('missing optional keys decode to their default', () async {
+      final String output = await _generate(
+        _page(
+          'const PageScreen({required this.id, this.visits = 0, super.key});',
+          fields: 'final String id; final int visits;',
+        ),
+      );
+
+      expect(
+        output,
+        contains("json.containsKey('visits')"),
+      );
+      expect(output, contains(': 0'));
     });
 
     test('positional arguments stay positional', () async {
