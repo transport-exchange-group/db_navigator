@@ -1,6 +1,10 @@
 <!--
 Sync Impact Report
-- Version change: (unversioned template) → 1.0.0
+- Version change: 1.0.0 → 1.0.1 (PATCH, 2026-10-07)
+  - Technical Constraints: SDK floors raised to Dart >=3.1.0 <4.0.0, Flutter >=3.13.0 (FR-014)
+  - Development Workflow: tests live in the owning package's test/ (root,
+    db_navigator_generator/, example/)
+- Previous: (unversioned template) → 1.0.0
 - Principles defined:
   - [PRINCIPLE_1_NAME] → I. Keep It Simple (KISS)
   - [PRINCIPLE_2_NAME] → II. Don't Repeat Yourself (DRY)
@@ -70,7 +74,7 @@ safe to extend without breaking consumers.
 
 ## Technical Constraints
 
-- Language and SDK: Dart `>=3.0.0 <4.0.0`, Flutter `>=3.0.0`, as declared in `pubspec.yaml`.
+- Language and SDK: Dart `>=3.1.0 <4.0.0`, Flutter `>=3.13.0`, as declared in `pubspec.yaml`.
 - Linting: `flutter_code_style` via `analysis_options.yaml`; `flutter analyze` MUST report
   no errors or warnings.
 - Generated code (`*.g.dart`) MUST be produced by `build_runner` and MUST NOT be edited by hand.
@@ -79,7 +83,8 @@ safe to extend without breaking consumers.
 ## Development Workflow
 
 - Every change MUST pass `flutter analyze` and `flutter test` before merge.
-- New or changed behaviour MUST be covered by tests in `test/`.
+- New or changed behaviour MUST be covered by tests in the owning package's `test/`
+  (root, `db_navigator_generator/`, `example/`).
 - Reviews MUST check each change against Principles I–IV and reject unjustified
   complexity, duplication, SOLID violations, or unnecessary comments.
 - Breaking changes to the public API MUST be recorded in `CHANGELOG.md` with a matching
@@ -94,4 +99,4 @@ safe to extend without breaking consumers.
   MINOR for new principles or sections, PATCH for clarifications.
 - Compliance is verified at plan time (Constitution Check) and at code review.
 
-**Version**: 1.0.0 | **Ratified**: 2026-10-05 | **Last Amended**: 2026-10-05
+**Version**: 1.0.1 | **Ratified**: 2026-10-05 | **Last Amended**: 2026-10-07

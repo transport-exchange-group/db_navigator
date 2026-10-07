@@ -88,6 +88,8 @@ Router direction (own generator vs auto_route / go_router) was settled in the sp
   - Output tests with `build_test` (`testBuilder`) — exact-output checks per scenario (FR-011).
   - Compile-error tests (SC-003): fixture files using generated routes wrongly, analysed with `AnalysisContextCollection`; each fixture line tagged `// expect-error: <code>` must report that diagnostic.
   - Pick the newest `build_test` whose constraints accept `build 2.5.x` and `analyzer <8` at implementation time.
+  - **Chosen (2026-10-07)**: `build_test ^3.2.1` — resolves with build 2.5.4, analyzer 7.7.1, source_gen 2.0.0, dart_style 3.1.1 under Flutter 3.38.8 / Dart 3.10.7.
+  - The generator does not depend on `db_navigator` (a Flutter package): annotations are matched by URL (`TypeChecker.fromUrl`), so `dart test` runs without the Flutter SDK. Output tests supply in-memory `db_navigator` / `flutter` stubs.
 
 ## R14 — Deprecations in this release
 

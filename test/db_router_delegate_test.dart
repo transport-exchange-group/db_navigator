@@ -1,15 +1,17 @@
-import 'dart:async';
-
+import 'package:bdlogging/bdlogging.dart';
 import 'package:db_navigator/src/db_navigation_observer.dart';
 import 'package:db_navigator/src/db_page.dart';
 import 'package:db_navigator/src/db_page_builder.dart';
 import 'package:db_navigator/src/db_router_delegate.dart';
 import 'package:db_navigator/src/destination.dart';
 import 'package:db_navigator/src/exceptions.dart';
+import 'package:db_navigator/src/pop_result_tracker.dart';
+import 'package:db_navigator/src/result_type_check.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'typed_route_utils.dart';
 import 'utils.dart';
 
 void main() {
@@ -110,8 +112,7 @@ void main() {
         'should not update page stack and popResultTracker '
         'if there is no pageBuilder that can build the new route',
         () async {
-          final Map<String, Completer<Object>> popResultTracker =
-              <String, Completer<Object>>{};
+          final PopResultTracker popResultTracker = PopResultTracker();
 
           final DBRouterDelegate routerDelegate = DBRouterDelegate(
             pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
@@ -135,8 +136,7 @@ void main() {
         'should add a new result trackers to popResultTracker map '
         'if new route is supported by one of pageBuilders',
         () async {
-          final Map<String, Completer<Object>> popResultTracker =
-              <String, Completer<Object>>{};
+          final PopResultTracker popResultTracker = PopResultTracker();
 
           final DBRouterDelegate routerDelegate = DBRouterDelegate(
             pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
@@ -144,14 +144,13 @@ void main() {
             popResultTracker: popResultTracker,
           );
 
-          expect(popResultTracker, isEmpty);
+          expect(popResultTracker.length, isZero);
 
           const Destination page2Destination = Destination(path: Page2.path);
 
           await routerDelegate.setNewRoutePath(page2Destination);
 
-          expect(popResultTracker, hasLength(1));
-          expect(popResultTracker, contains(page2Destination.path));
+          expect(popResultTracker.length, equals(1));
         },
       );
 
@@ -224,8 +223,7 @@ void main() {
       test('should throw assert error if pages list empty', () {
         const TestPageBuilder pageBuilder = TestPageBuilder();
 
-        final Map<String, Completer<Object?>> trackers =
-            <String, Completer<Object?>>{};
+        final PopResultTracker trackers = PopResultTracker();
 
         final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
           <DBPage>[],
@@ -245,8 +243,7 @@ void main() {
       test('should throw assert error if pages list only have one page', () {
         const TestPageBuilder pageBuilder = TestPageBuilder();
 
-        final Map<String, Completer<Object?>> trackers =
-            <String, Completer<Object?>>{};
+        final PopResultTracker trackers = PopResultTracker();
 
         final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
           <DBPage>[TestPageBuilder.initialPage],
@@ -272,8 +269,7 @@ void main() {
             const Destination(path: Page2.path),
           );
 
-          final Map<String, Completer<Object?>> trackers =
-              <String, Completer<Object?>>{};
+          final PopResultTracker trackers = PopResultTracker();
 
           final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
             <DBPage>[page2, TestPageBuilder.initialPage],
@@ -379,7 +375,7 @@ void main() {
             <DBPage>[],
             <DBPageBuilder>[const TestPageBuilder()],
             navigatorKey,
-            <String, Completer<Object?>>{},
+            PopResultTracker(),
             DBNavigationObserver(),
             <NavigatorObserver>[],
             null,
@@ -399,8 +395,7 @@ void main() {
           final DBPage page2 =
               await pageBuilder.buildPage(const Destination(path: Page2.path));
 
-          final Map<String, Completer<Object?>> trackers =
-              <String, Completer<Object?>>{};
+          final PopResultTracker trackers = PopResultTracker();
 
           final DBRouterDelegate routerDelegate = DBRouterDelegate.private(
             <DBPage>[TestPageBuilder.initialPage, page2],
@@ -429,8 +424,7 @@ void main() {
       'should change the navigator page builders to different pageBuilders '
       'and initial page',
       () async {
-        final Map<String, Completer<Object?>> trackers =
-            <String, Completer<Object?>>{};
+        final PopResultTracker trackers = PopResultTracker();
 
         final DBRouterDelegate routerDelegate = DBRouterDelegate(
           pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
@@ -456,7 +450,7 @@ void main() {
 
         expect(routerDelegate.pages, isNot(orderedEquals(previousPages)));
 
-        expect(trackers, isEmpty);
+        expect(trackers.length, isZero);
       },
     );
 
@@ -527,7 +521,7 @@ void main() {
           <DBPage>[],
           <DBPageBuilder>[const TestPageBuilder()],
           navigatorKey,
-          <String, Completer<Object?>>{},
+          PopResultTracker(),
           DBNavigationObserver(),
           <NavigatorObserver>[],
           null,
@@ -567,7 +561,7 @@ void main() {
             <DBPage>[TestPageBuilder.initialPage, page2],
             <DBPageBuilder>[pageBuilder],
             navigatorKey,
-            <String, Completer<Object?>>{},
+            PopResultTracker(),
             DBNavigationObserver(),
             <NavigatorObserver>[],
             null,
@@ -597,7 +591,7 @@ void main() {
             <DBPage>[TestPageBuilder.initialPage, page2, page3],
             <DBPageBuilder>[pageBuilder],
             navigatorKey,
-            <String, Completer<Object?>>{},
+            PopResultTracker(),
             DBNavigationObserver(),
             <NavigatorObserver>[],
             null,
@@ -630,7 +624,7 @@ void main() {
             <DBPage>[TestPageBuilder.initialPage, page2, page3, page4],
             <DBPageBuilder>[pageBuilder],
             navigatorKey,
-            <String, Completer<Object?>>{},
+            PopResultTracker(),
             DBNavigationObserver(),
             <NavigatorObserver>[],
             null,
@@ -657,7 +651,7 @@ void main() {
         <DBPage>[],
         <DBPageBuilder>[const TestPageBuilder()],
         navigatorKey,
-        <String, Completer<Object?>>{},
+        PopResultTracker(),
         DBNavigationObserver(),
         <NavigatorObserver>[],
         null,
@@ -680,7 +674,7 @@ void main() {
           <DBPage>[TestPageBuilder.initialPage],
           <DBPageBuilder>[pageBuilder],
           navigatorKey,
-          <String, Completer<Object?>>{},
+          PopResultTracker(),
           DBNavigationObserver(),
           <NavigatorObserver>[],
           null,
@@ -717,7 +711,7 @@ void main() {
           <DBPage>[TestPageBuilder.initialPage, page2, page3, page4],
           <DBPageBuilder>[pageBuilder],
           navigatorKey,
-          <String, Completer<Object?>>{},
+          PopResultTracker(),
           DBNavigationObserver(),
           <NavigatorObserver>[],
           null,
@@ -735,6 +729,105 @@ void main() {
         );
       },
     );
+  });
+
+  group('result tracking (FR-012)', () {
+    DBRouterDelegate createDelegate() {
+      return DBRouterDelegate(
+        pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+        initialPage: TestPageBuilder.initialPage,
+        navigatorKey: navigatorKey,
+      );
+    }
+
+    test('same path pushed twice gives each caller its own result', () async {
+      final DBRouterDelegate delegate = createDelegate();
+
+      final Future<String?> first =
+          delegate.navigateTo<String>(location: Page2.path);
+      final Future<String?> second =
+          delegate.navigateTo<String>(location: Page2.path);
+      await pumpEventQueue();
+
+      delegate
+        ..close<String>('second')
+        ..close<String>('first');
+
+      expect(await first, 'first');
+      expect(await second, 'second');
+    });
+
+    test('dispose after reset does not throw', () async {
+      final DBRouterDelegate delegate = createDelegate();
+
+      final Future<Object?> pending =
+          delegate.navigateTo<Object?>(location: Page2.path);
+      await pumpEventQueue();
+
+      await delegate
+          .reset(Page1.path, <DBPageBuilder>[const TestPageBuilder()]);
+
+      expect(delegate.dispose, returnsNormally);
+      expect(await pending, isNull);
+    });
+
+    test('closeUntilLast delivers the result map', () async {
+      final DBRouterDelegate delegate = createDelegate();
+
+      final Future<String?> page2 =
+          delegate.navigateTo<String>(location: Page2.path);
+      final Future<String?> page3 =
+          delegate.navigateTo<String>(location: Page3.path);
+      await pumpEventQueue();
+
+      delegate.closeUntilLast(
+        resultMap: <String, Object?>{Page2.path: 'two', Page3.path: 'three'},
+      );
+
+      expect(await page2, 'two');
+      expect(await page3, 'three');
+      expect(delegate.pages, hasLength(1));
+    });
+
+    test('wrong result type asserts naming route and both types', () async {
+      final DBRouterDelegate delegate = createDelegate();
+
+      final Future<int?> result =
+          delegate.navigateTo<int>(location: Page2.path);
+      await pumpEventQueue();
+
+      delegate.close<String>('not an int');
+
+      await expectLater(
+        result,
+        throwsA(
+          isA<AssertionError>().having(
+            (AssertionError error) => error.message.toString(),
+            'message',
+            allOf(contains(Page2.path), contains('int'), contains('String')),
+          ),
+        ),
+      );
+    });
+
+    test('wrong result type in release returns null and warns', () async {
+      final RecordingLogHandler handler = RecordingLogHandler();
+      BDLogger().addHandler(handler);
+      addTearDown(() => BDLogger().removeHandler(handler));
+
+      final int? result = checkResultType<int>(
+        'not an int',
+        location: Page2.path,
+        assertionsEnabled: false,
+      );
+      await Future<void>.delayed(const Duration(milliseconds: 600));
+
+      expect(result, isNull);
+      expect(
+        handler.records.map((BDLogRecord record) => record.message),
+        contains(allOf(contains(Page2.path), contains('int'))),
+      );
+    });
   });
 }
 

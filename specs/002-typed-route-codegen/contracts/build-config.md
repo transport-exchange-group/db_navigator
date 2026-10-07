@@ -28,6 +28,8 @@ Run: `dart run build_runner build --delete-conflicting-outputs`
 | `db_route_descriptor` | `.dart` | `.db_route.json` | `auto_apply: dependents`, `build_to: cache` |
 | `db_feature_routes` | `lib/$lib$` | `lib/db_routes.g.dart` | `auto_apply: dependents`, `build_to: source`, `required_inputs: [".db_route.json"]` |
 
+Implementation notes: the generator does not depend on `db_navigator` (annotations matched by URL), and `DBTypedRoute` exposes `location` because a class cannot hold both `static const path` and an inherited instance `path`.
+
 `db_route` uses source_gen's shared part builder, which can only emit the part file — hence the separate `db_route_descriptor` builder. The part shares `*.g.dart` with json_serializable / freezed.
 
 ## Version constraints

@@ -1,7 +1,10 @@
 import 'dart:async';
 import 'package:bdlogging/bdlogging.dart';
+import 'package:collection/collection.dart';
 import 'package:db_navigator/db_navigator.dart';
 import 'package:db_navigator/src/db_navigation_observer.dart';
+import 'package:db_navigator/src/pop_result_tracker.dart';
+import 'package:db_navigator/src/result_type_check.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
@@ -20,7 +23,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   final GlobalKey<NavigatorState> _navigatorKey;
   final List<DBPage> _pages;
   final List<DBPageBuilder> _pageBuilders;
-  final Map<String, Completer<Object?>> _popResultTracker;
+  final PopResultTracker _popResultTracker;
+  final DBPage Function(Destination destination)? _notFoundPageFactory;
   final List<NavigatorObserver> _customNavigatorObservers;
   final DBNavigationObserver _navigationObserver;
   final String? _restorationScopeId;
@@ -91,16 +95,20 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   /// same state on different [build] and that can be used to
   /// access the navigator created by this delegate.
   ///
-  /// [popResultTracker] A [Map] that track pop result of page pushed
+  /// [popResultTracker] tracks the pop result of each page pushed
   /// into the stack.
+  ///
+  /// [notFoundPageFactory] builds the page shown when a deep link or restored
+  /// route can't be built; without it the stack is kept and a warning logged.
   factory DBRouterDelegate({
     required DBPage initialPage,
     required List<DBPageBuilder> pageBuilders,
     GlobalKey<NavigatorState>? navigatorKey,
     List<NavigatorObserver>? navigatorObservers,
-    @visibleForTesting Map<String, Completer<Object?>>? popResultTracker,
+    @visibleForTesting PopResultTracker? popResultTracker,
     String? restorationScopeId,
     bool reportPageUpdateToEngine = false,
+    DBPage Function(Destination destination)? notFoundPageFactory,
   }) {
     assert(pageBuilders.isNotEmpty, 'Page builder list is empty');
     assert(
@@ -116,11 +124,12 @@ class DBRouterDelegate extends RouterDelegate<Destination>
       <DBPage>[initialPage],
       List<DBPageBuilder>.of(pageBuilders),
       navigatorKey ?? GlobalKey<NavigatorState>(),
-      popResultTracker ?? <String, Completer<Object?>>{},
+      popResultTracker ?? PopResultTracker(),
       DBNavigationObserver(),
       navigatorObservers ?? <NavigatorObserver>[],
       restorationScopeId,
       reportPageUpdateToEngine: reportPageUpdateToEngine,
+      notFoundPageFactory: notFoundPageFactory,
     );
   }
 
@@ -135,7 +144,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     this._customNavigatorObservers,
     this._restorationScopeId, {
     this.reportPageUpdateToEngine = false,
-  });
+    DBPage Function(Destination destination)? notFoundPageFactory,
+  }) : _notFoundPageFactory = notFoundPageFactory;
 
   @override
   Future<void> setInitialRoutePath(Destination configuration) async {
@@ -144,26 +154,16 @@ class DBRouterDelegate extends RouterDelegate<Destination>
       '$configuration',
     );
 
-    final DBPage? newPage = await pageBuilders.getPage(configuration);
+    final DBPage? newPage = await _pageOrNotFound(configuration);
 
-    // This is called mostly for deep linking or web navigation
-    // if the path is unknown and can't be handle we just ignore it
-    // or we could return the user to a 404 page.
     if (newPage != null) {
-      // Setting a initial route we need clear up the the stack
-      // and reset the history to start with the requested route.
-      _pages.clear();
+      final List<DBPage> history =
+          await _historyPages(configuration.metadata.history);
 
-      final List<Destination>? newStack = configuration.metadata.history;
-
-      // If the new destination has a history then we need to recreate that
-      // stack before add the new page.
-      if (newStack != null) {
-        final List<DBPage> newPages = await _pageBuilders.createPages(newStack);
-
-        _pages.addAll(newPages);
-      }
-      _pages.add(newPage);
+      _pages
+        ..clear()
+        ..addAll(history)
+        ..add(newPage);
     }
   }
 
@@ -174,11 +174,8 @@ class DBRouterDelegate extends RouterDelegate<Destination>
       '$configuration',
     );
 
-    final DBPage? newPage = await pageBuilders.getPage(configuration);
+    final DBPage? newPage = await _pageOrNotFound(configuration);
 
-    // Since this is called mostly for deep linking or web navigation
-    // if the path is unknown and can't be handle we just ignore it
-    // or we could return the user to a 404 page.
     if (newPage != null) {
       // map the current list of page to it's destination representation.
       final Iterable<Destination> currentHistory = _pages.map(
@@ -199,18 +196,11 @@ class DBRouterDelegate extends RouterDelegate<Destination>
       // this might be called when switching tabs.
       if (!areNavigationStackEquals(currentHistory, newPageFullHistory)) {
         // If the new stack is null or empty than we just add the new page.
-        if (newPageHistory == null || newPageHistory.isEmpty) {
-          _pages.add(newPage);
-        } else {
-          final List<DBPage> newPages =
-              await _pageBuilders.createPages(newPageHistory);
+        _pages
+          ..addAll(await _historyPages(newPageHistory))
+          ..add(newPage);
 
-          _pages
-            ..addAll(newPages)
-            ..add(newPage);
-        }
-        final Completer<Object> popTracker = Completer<Object>();
-        _popResultTracker[configuration.path] = popTracker;
+        unawaited(_popResultTracker.track(newPage));
       }
     }
   }
@@ -284,11 +274,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
         ..add(initialPage);
     }
 
-    for (final Completer<Object?> tracker in _popResultTracker.values) {
-      if (!tracker.isCompleted) {
-        tracker.complete();
-      }
-    }
+    _popResultTracker.completeAll();
 
     notifyListeners();
   }
@@ -301,11 +287,11 @@ class DBRouterDelegate extends RouterDelegate<Destination>
   }) async {
     assert(location.trim().isNotEmpty, 'destination location is empty');
 
-    if (history != null && history.isNotEmpty) {
-      final List<DBPage> newPages = await _pageBuilders.buildStack(history);
+    final List<DBPage> historyPages = history != null && history.isNotEmpty
+        ? await _pageBuilders.buildStack(history)
+        : <DBPage>[];
 
-      _pages.addAll(newPages);
-    }
+    _pages.addAll(historyPages);
 
     final Destination destination = Destination(
       path: location,
@@ -323,22 +309,14 @@ class DBRouterDelegate extends RouterDelegate<Destination>
 
     _pages.add(newPage);
 
-    final Completer<T?> popTracker = Completer<T?>();
-    _popResultTracker[destination.path] = popTracker;
+    final Future<Object?> pageResult = _popResultTracker.track(newPage);
+    final Future<Object?> result = historyPages.isEmpty
+        ? pageResult
+        : _popResultTracker.track(historyPages.first);
 
     notifyListeners();
 
-    if (history != null && history.isNotEmpty) {
-      final Completer<T?> topPagePopTracker = Completer<T?>();
-      _popResultTracker[history.first.path] = topPagePopTracker;
-
-      final T? result = await topPagePopTracker.future;
-      return result;
-    }
-
-    final T? result = await popTracker.future;
-
-    return result;
+    return checkResultType<T>(await result, location: location);
   }
 
   @override
@@ -358,13 +336,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
 
     final DBPage topPage = _pages.removeLast();
 
-    final Completer<Object?>? tracker = _popResultTracker.remove(
-      topPage.destination.path,
-    );
-
-    if (tracker != null && !tracker.isCompleted) {
-      tracker.complete(result);
-    }
+    _popResultTracker.complete(topPage, result);
 
     notifyListeners();
   }
@@ -381,7 +353,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
 
     final Destination lastPageDestination = _pages.first.destination;
 
-    closeUntil(location: lastPageDestination.path);
+    closeUntil(location: lastPageDestination.path, resultMap: resultMap);
   }
 
   @override
@@ -422,15 +394,7 @@ class DBRouterDelegate extends RouterDelegate<Destination>
 
     // Run throughout the list of pages, from the top most page first and on.
     for (final DBPage page in pagesToClose.reversed) {
-      final Completer<Object?>? tracker = _popResultTracker.remove(
-        page.destination.path,
-      );
-
-      final Object? result = resultMap?[page.destination.path];
-
-      if (tracker != null && !tracker.isCompleted) {
-        tracker.complete(result);
-      }
+      _popResultTracker.complete(page, resultMap?[page.destination.path]);
     }
 
     notifyListeners();
@@ -446,28 +410,16 @@ class DBRouterDelegate extends RouterDelegate<Destination>
     // In the imperative pop, the route can decline to be pop so we
     // need to only update the page if the route has agreed to be pop.
     if (popSucceeded) {
-      // the navigator pop always remove the top most page but for safety
-      // i prefer to look for the page before popping it.
-      DBPage? foundPage;
+      final DBPage? poppedPage = _pages.firstWhereOrNull(
+        (DBPage page) => identical(page, route.settings),
+      );
 
-      for (final DBPage page in _pages) {
-        if (page.name == route.settings.name) {
-          foundPage = page;
-          break;
-        }
+      if (poppedPage != null) {
+        _pages.remove(poppedPage);
+        _popResultTracker.complete(poppedPage, result);
       }
-
-      _pages.remove(foundPage);
 
       notifyListeners();
-      // if someone is waiting for the result, we remove it and signal
-      // the completion.
-      final Completer<Object?>? tracker =
-          _popResultTracker.remove(foundPage?.name);
-
-      if (tracker?.isCompleted == false) {
-        tracker?.complete(result);
-      }
     }
 
     return popSucceeded;
@@ -475,14 +427,57 @@ class DBRouterDelegate extends RouterDelegate<Destination>
 
   @override
   void dispose() {
-    _popResultTracker.values.forEach((Completer<Object?> tracker) {
-      tracker.complete();
-    });
-
-    _popResultTracker.clear();
+    _popResultTracker.completeAll();
 
     _navigationObserver.reset();
     super.dispose();
+  }
+
+  Future<DBPage?> _pageOrNotFound(Destination configuration) async {
+    try {
+      final DBPage? page = await _pageBuilders.getPage(configuration);
+
+      if (page != null) {
+        return page;
+      }
+    } on Object catch (error, stackTrace) {
+      BDLogger().warning(
+        '${restorationScopeId}DBRouterDelegate: '
+        'could not build ${configuration.path}',
+        error: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    final DBPage Function(Destination destination)? notFoundPageFactory =
+        _notFoundPageFactory;
+
+    if (notFoundPageFactory == null) {
+      BDLogger().warning(
+        '${restorationScopeId}DBRouterDelegate: no page for '
+        '${configuration.path}, keeping the current stack',
+      );
+      return null;
+    }
+
+    return notFoundPageFactory(configuration);
+  }
+
+  Future<List<DBPage>> _historyPages(List<Destination>? history) async {
+    if (history == null || history.isEmpty) {
+      return <DBPage>[];
+    }
+
+    try {
+      return await _pageBuilders.createPages(history);
+    } on Object catch (error, stackTrace) {
+      BDLogger().warning(
+        '${restorationScopeId}DBRouterDelegate: could not rebuild history',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      return <DBPage>[];
+    }
   }
 
   /// Check the equality between two list of destination.

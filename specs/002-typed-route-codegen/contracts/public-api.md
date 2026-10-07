@@ -16,7 +16,7 @@ class DBRoute<R extends Object?> {
 
 abstract class DBTypedRoute<R extends Object?> {
   const DBTypedRoute();
-  String get path;
+  String get location;   // not `path`: generated classes own `static const path`
   bool get isRestorable;
   Map<String, Object?>? toJson();
   Widget buildWidget();
