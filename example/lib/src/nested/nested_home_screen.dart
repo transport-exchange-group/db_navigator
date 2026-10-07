@@ -1,4 +1,5 @@
 import 'package:db_navigator/db_navigator.dart';
+import 'package:example/db_routes.g.dart';
 import 'package:example/src/nested/screen_page_builder.dart';
 import 'package:flutter/material.dart';
 
@@ -25,11 +26,19 @@ class _NestedHomeScreenState extends State<NestedHomeScreen> {
     _tabDelegates = <DBRouterDelegate>[
       DBRouterDelegate(
         initialPage: ScreenPageBuilder.initialPage,
-        pageBuilders: <DBPageBuilder>[ScreenPageBuilder()],
+        pageBuilders: <DBPageBuilder>[
+          const ProfileRoutes(),
+          const SettingsRoutes(),
+          ScreenPageBuilder(),
+        ],
       ),
       DBRouterDelegate(
         initialPage: ScreenPageBuilder.initialPage,
-        pageBuilders: <DBPageBuilder>[ScreenPageBuilder()],
+        pageBuilders: <DBPageBuilder>[
+          const ProfileRoutes(),
+          const SettingsRoutes(),
+          ScreenPageBuilder(),
+        ],
       ),
     ];
   }

@@ -2,6 +2,7 @@ import 'package:db_navigator/db_navigator.dart';
 import 'package:example/src/args_demo_screen.dart';
 import 'package:example/src/profile/profile_screen.dart';
 import 'package:example/src/regular_demo.dart';
+import 'package:example/src/settings/settings_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -34,6 +35,7 @@ class HomeScreen extends StatelessWidget {
                   destination: ArgsDemoScreen.path,
                 ),
                 _TypedDemoItem(),
+                _SettingsDemoItem(),
               ],
             ),
           ),
@@ -51,6 +53,18 @@ class _TypedDemoItem extends StatelessWidget {
     return GestureDetector(
       onTap: () => const ProfileRoute(userId: 'u1').push(context),
       child: const Card(elevation: 2, child: Center(child: Text('Typed'))),
+    );
+  }
+}
+
+class _SettingsDemoItem extends StatelessWidget {
+  const _SettingsDemoItem();
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => const SettingsRoute().push(context),
+      child: const Card(elevation: 2, child: Center(child: Text('Settings'))),
     );
   }
 }

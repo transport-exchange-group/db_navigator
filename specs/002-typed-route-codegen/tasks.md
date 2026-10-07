@@ -136,11 +136,11 @@ description: "Task list for Typed Route Code Generation"
 ### Implementation for User Story 3
 
 - [X] T048 [US3] Add duplicate-path and entry-count validation to `db_navigator_generator/lib/src/feature_routes_builder.dart` using T010 messages
-- [ ] T049 [US3] Example: pass `onEntered` to `ProfileRoutes` in `example/lib/src/example_app.dart` to run the feature's dependency setup and log scope entry; `onExited` logs scope exit (H2 — DI lives in `onEntered`)
+- [X] T049 [US3] Example: pass `onEntered` to `ProfileRoutes` in `example/lib/src/example_app.dart` to run the feature's dependency setup and log scope entry; `onExited` logs scope exit (H2 — DI lives in `onEntered`)
 - [X] T050 [US3] Read and validate `pageFactory` in `db_navigator_generator/lib/src/route_generator.dart` and emit it into `definition`
-- [ ] T051 [US3] Example: add second generated feature `settings` with two routes (one entry) in `example/lib/src/settings/`, one using a page factory from `example/lib/src/page_transitions/`; regenerate
-- [ ] T052 [US3] Example: register `ProfileRoutes` and `SettingsRoutes` in the root delegate (`example/lib/src/example_app.dart`) and in the nested delegate (`example/lib/src/nested/nested_home_screen.dart`)
-- [ ] T053 [US3] Example test `example/test/feature_routes_test.dart`: quickstart row 4 — every route of both features resolves in root and nested navigators
+- [X] T051 [US3] Example: add second generated feature `settings` with two routes (one entry) in `example/lib/src/settings/`, one using a page factory from `example/lib/src/page_transitions/`; regenerate
+- [X] T052 [US3] Example: register `ProfileRoutes` and `SettingsRoutes` in the root delegate (`example/lib/src/example_app.dart`) and in the nested delegate (`example/lib/src/nested/nested_home_screen.dart`)
+- [X] T053 [US3] Example test `example/test/feature_routes_test.dart`: quickstart row 4 — every route of both features resolves in root and nested navigators
 
 **Checkpoint**: Feature registration fully generated; duplicate/entry errors actionable
 
@@ -154,7 +154,7 @@ description: "Task list for Typed Route Code Generation"
 
 ### Tests for User Story 4 ⚠️ write first, confirm they fail
 
-- [ ] T054 [P] [US4] `test/db_router_delegate_interop_test.dart`: legacy page → generated route → legacy page in one `DBRouterDelegate`, results delivered in both directions and either push order (FR-007)
+- [X] T054 [P] [US4] `test/db_router_delegate_interop_test.dart`: legacy page → generated route → legacy page in one `DBRouterDelegate`, results delivered in both directions and either push order (FR-007)
 - [X] T055 [P] [US4] Example test `example/test/mixed_navigation_test.dart`: quickstart row 5
 
 ### Implementation for User Story 4
@@ -178,21 +178,21 @@ description: "Task list for Typed Route Code Generation"
 ### Tests for User Story 5 ⚠️ write first, confirm they fail
 
 - [X] T061 [P] [US5] Extend `db_navigator_generator/test/route_generator_test.dart`: `VoidCallback onDone` → `isRestorable` false, `toJson()` returns `null`, exact comment line `// In-memory only (onDone: VoidCallback): not restored, not deep-linkable.` above the class; descriptor `isRestorable: false`; class with `toJson` but no `fromJson` (or reverse) → error naming parameter + type
-- [ ] T062 [P] [US5] Extend `test/db_route_information_parser_test.dart`: `restoreRouteInformation` state is `metadata.toJson()` (a `Map`); history truncated at the first destination whose arguments are not JSON-primitive (generated in-memory route, or legacy object without `HasToJson`)
-- [ ] T063 [P] [US5] Extend `test/destination_test.dart`: `Destination.fromRouteInformation` accepts a `Map` state
-- [ ] T064 [P] [US5] Extend `test/destination_argument_converter_test.dart`: `pojoToJson(DBTypedRoute)` returns its `toJson()` with no type-name key
-- [ ] T065 [P] [US5] `test/db_router_delegate_not_found_test.dart`: unknown deep-link path with `notFoundPageFactory` → not-found page pushed; without → stack kept + `BDLogger` warning; generated route whose `decode` throws → same handling
+- [X] T062 [P] [US5] Extend `test/db_route_information_parser_test.dart`: `restoreRouteInformation` state is `metadata.toJson()` (a `Map`); history truncated at the first destination whose arguments are not JSON-primitive (generated in-memory route, or legacy object without `HasToJson`)
+- [X] T063 [P] [US5] Extend `test/destination_test.dart`: `Destination.fromRouteInformation` accepts a `Map` state
+- [X] T064 [P] [US5] Extend `test/destination_argument_converter_test.dart`: `pojoToJson(DBTypedRoute)` returns its `toJson()` with no type-name key
+- [X] T065 [P] [US5] `test/db_router_delegate_not_found_test.dart`: unknown deep-link path with `notFoundPageFactory` → not-found page pushed; without → stack kept + `BDLogger` warning; generated route whose `decode` throws → same handling
 
 ### Implementation for User Story 5
 
 - [X] T066 [US5] Classify every other type as `ArgumentCodec.inMemory` and add the `toJson`/`fromJson` mismatch check in `db_navigator_generator/lib/src/route_argument_reader.dart`
 - [X] T067 [US5] Emit in-memory routes in `db_navigator_generator/lib/src/route_generator.dart`: the single comment line, `isRestorable => false`, `toJson() => null`, descriptor `isRestorable: false`
-- [ ] T068 [US5] `lib/src/db_route_information_parser.dart`: store `metadata.toJson()` in `RouteInformation.state`, cutting history at the first non-restorable destination (research R6)
-- [ ] T069 [US5] `lib/src/destination.dart`: accept `Map` state in `fromRouteInformation`
-- [ ] T070 [US5] `lib/src/destination_argument_converter.dart`: add `DBTypedRoute` branch in `pojoToJson`
-- [ ] T071 [US5] `lib/src/db_router_delegate.dart`: optional `notFoundPageFactory: DBPage Function(Destination)?` used by `setInitialRoutePath` / `setNewRoutePath` when no builder supports the path or decode fails; otherwise keep stack and `BDLogger().warning(...)` (FR-015, research R9)
-- [ ] T072 [US5] Example: add an in-memory route with a `VoidCallback` argument under `example/lib/src/settings/` and a not-found page passed to the root delegate; regenerate
-- [ ] T073 [US5] Example tests `example/test/restoration_test.dart`: quickstart rows 10 (restore stops at in-memory route) and 11 (unknown deep link with / without not-found page)
+- [X] T068 [US5] `lib/src/db_route_information_parser.dart`: store `metadata.toJson()` in `RouteInformation.state`, cutting history at the first non-restorable destination (research R6)
+- [X] T069 [US5] `lib/src/destination.dart`: accept `Map` state in `fromRouteInformation`
+- [X] T070 [US5] `lib/src/destination_argument_converter.dart`: add `DBTypedRoute` branch in `pojoToJson`
+- [X] T071 [US5] `lib/src/db_router_delegate.dart`: optional `notFoundPageFactory: DBPage Function(Destination)?` used by `setInitialRoutePath` / `setNewRoutePath` when no builder supports the path or decode fails; otherwise keep stack and `BDLogger().warning(...)` (FR-015, research R9)
+- [X] T072 [US5] Example: add an in-memory route with a `VoidCallback` argument under `example/lib/src/settings/` and a not-found page passed to the root delegate; regenerate
+- [X] T073 [US5] Example tests `example/test/restoration_test.dart`: quickstart rows 10 (restore stops at in-memory route) and 11 (unknown deep link with / without not-found page)
 - [ ] T074 [US5] Quickstart row 12: `flutter build apk --obfuscate --split-debug-info=build/sym` in `example/`, restore on device/emulator, confirm argument values identical (FR-008)
 
 **Checkpoint**: All five stories independently functional

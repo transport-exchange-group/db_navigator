@@ -14,6 +14,7 @@ void main() {
           onEntered: (String scope) => debugPrint('entered $scope'),
           onExited: (String scope) => debugPrint('exited $scope'),
         ),
+        const SettingsRoutes(),
       ],
     ),
   );

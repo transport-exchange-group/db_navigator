@@ -10,14 +10,18 @@ Future<void> pumpExampleApp(WidgetTester tester) async {
   await tester.pumpWidget(
     ExampleApp(
       initialPage: HomePageBuilder.initialPage,
-      pageBuilders: <DBPageBuilder>[HomePageBuilder(), const ProfileRoutes()],
+      pageBuilders: <DBPageBuilder>[
+        HomePageBuilder(),
+        const ProfileRoutes(),
+        const SettingsRoutes(),
+      ],
     ),
   );
   await tester.pumpAndSettle();
 }
 
 BuildContext homeContext(WidgetTester tester) {
-  return tester.element(find.byType(HomeScreen));
+  return tester.element(find.byType(HomeScreen, skipOffstage: false));
 }
 
 DBRouterDelegate rootDelegate(WidgetTester tester) {
