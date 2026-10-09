@@ -1,11 +1,11 @@
 name: db_navigator
 description: A flutter package that provide easy navigation with navigator 2.0.
-version: 1.0.0
+version: 1.1.0
 homepage: https://github.com/bitsydarel/db_navigator
 
 environment:
-  sdk: ">=3.0.0 <4.0.0"
-  flutter: ">=3.0.0"
+  sdk: ">=3.1.0 <4.0.0"
+  flutter: ">=3.13.0"
 
 dependencies:
   bdlogging: ">=1.1.1 <2.0.0"

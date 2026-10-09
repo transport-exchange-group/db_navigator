@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'typed_route_utils.dart';
 import 'utils.dart';
 
 void main() {
@@ -76,6 +77,53 @@ void main() {
       );
     },
   );
+
+  testWidgets('system back on a pushed legacy page completes with null',
+      (WidgetTester tester) async {
+    final DBRouterDelegate delegate = DBRouterDelegate(
+      pageBuilders: <DBPageBuilder>[const TestPageBuilder()],
+      initialPage: TestPageBuilder.initialPage,
+    );
+    await tester.pumpWidget(
+      MaterialApp.router(
+        routerDelegate: delegate,
+        routeInformationParser: const DBRouteInformationParser(),
+      ),
+    );
+
+    final Future<String?> result =
+        delegate.navigateTo<String>(location: Page2.path);
+    await tester.pumpAndSettle();
+
+    await tester.state<NavigatorState>(find.byType(Navigator)).maybePop();
+    await tester.pumpAndSettle();
+
+    expect(await result, isNull);
+    expect(delegate.pages, hasLength(1));
+  });
+
+  testWidgets('onPopPage removes the popped page by identity, not name',
+      (WidgetTester tester) async {
+    final DBRouterDelegate delegate =
+        await pumpRouter(tester, <DBPageBuilder>[const GreetingRoutes()]);
+    const GreetingRoute first = GreetingRoute(name: 'first');
+    const GreetingRoute second = GreetingRoute(name: 'second');
+
+    final Future<bool?> firstResult = delegate.navigateTo<bool>(
+        location: GreetingRoute.path, arguments: first);
+    final Future<bool?> secondResult = delegate.navigateTo<bool>(
+        location: GreetingRoute.path, arguments: second);
+    await tester.pumpAndSettle();
+
+    await tester.state<NavigatorState>(find.byType(Navigator)).maybePop();
+    await tester.pumpAndSettle();
+
+    expect(await secondResult, isNull);
+    expect(delegate.pages.last.destination.metadata.arguments, same(first));
+
+    delegate.close<bool>(true);
+    expect(await firstResult, isTrue);
+  });
 }
 
 //must_be_immutable ignored just for Testing

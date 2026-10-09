@@ -1,0 +1,21 @@
+builders:
+  db_route:
+    import: "package:db_navigator_generator/builder.dart"
+    builder_factories: ["dbRouteBuilder"]
+    build_extensions: {".dart": [".db_route.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
+  db_route_descriptor:
+    import: "package:db_navigator_generator/builder.dart"
+    builder_factories: ["dbRouteDescriptorBuilder"]
+    build_extensions: {".dart": [".db_route.json"]}
+    auto_apply: dependents
+    build_to: cache
+  db_feature_routes:
+    import: "package:db_navigator_generator/builder.dart"
+    builder_factories: ["dbFeatureRoutesBuilder"]
+    build_extensions: {"lib/$lib$": ["lib/db_routes.g.dart"]}
+    auto_apply: dependents
+    build_to: source
+    required_inputs: [".db_route.json"]

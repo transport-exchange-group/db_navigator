@@ -1,3 +1,4 @@
+import 'package:db_navigator/src/typed/db_typed_route.dart';
 import 'package:flutter/cupertino.dart';
 
 /// Function that define a function that convert json to
@@ -77,6 +78,10 @@ class DestinationArgumentConverter {
 
   /// Convert [pojo] to json.
   static Object? pojoToJson(Object? pojo) {
+    if (pojo is DBTypedRoute<Object?>) {
+      return pojo.toJson();
+    }
+
     return pojo is HasToJson
         ? <String, Object>{pojo.runtimeType.toString(): pojo.toJson()}
         : pojo;

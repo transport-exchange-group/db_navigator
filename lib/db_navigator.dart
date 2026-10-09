@@ -14,6 +14,10 @@ export 'src/page_transitions/enter_from_right_exit_to_left_page_transition.dart'
 export 'src/page_transitions/enter_from_right_page_transition.dart';
 export 'src/page_transitions/fade_in_page_transition.dart';
 export 'src/scoped_page_builder.dart';
+export 'src/typed/db_feature_routes.dart';
+export 'src/typed/db_route.dart';
+export 'src/typed/db_route_definition.dart';
+export 'src/typed/db_typed_route.dart';
 export 'src/ui/db_nested_navigation_for_tab_view.dart';
 export 'src/ui/db_nested_navigation_indexed_stack.dart';
 export 'src/utils/db_router_delegate_extensions.dart';

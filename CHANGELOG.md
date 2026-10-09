@@ -1,3 +1,22 @@
+## 1.1.0
+
+* Added typed routes: `@DBRoute<R>` on a page widget plus the new `db_navigator_generator`
+  package generate a typed route class (compile-checked arguments and result) and a `const`
+  `DBFeatureRoutes` page builder per feature. New exports: `DBRoute`, `DBTypedRoute`,
+  `DBRouteDefinition`, `DBFeatureRoutes`.
+* Fixed result handling: results are tracked per pushed page (same path pushed twice no longer
+  loses a result), `closeUntilLast` delivers `resultMap`, `dispose` after `reset` no longer throws,
+  and a result of the wrong type asserts in debug (naming route and types) and returns `null` with
+  a warning in release instead of a `TypeError`.
+* Added `DBRouterDelegate(notFoundPageFactory:)` for unknown deep links; without it the stack is
+  kept and a warning logged (unknown paths were previously ignored silently).
+* Changed router restoration state from the `DestinationMetadata` object to its JSON. History is
+  cut at the first destination whose arguments can't be stored as JSON. `Destination.fromRouteInformation`
+  accepts a `Map` state.
+* Test-only: the `@visibleForTesting popResultTracker` parameter of `DBRouterDelegate` and
+  `DBRouterDelegate.private` changed type from `Map<String, Completer<Object?>>` to `PopResultTracker`.
+* Raised minimum SDK to Dart 3.1 / Flutter 3.13.
+
 ## 1.0.0
 
 * Added support for passing result to navigator.pop for DBRouterDelegate close method.

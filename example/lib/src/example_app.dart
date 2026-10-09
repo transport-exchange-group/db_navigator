@@ -1,4 +1,5 @@
 import 'package:db_navigator/db_navigator.dart';
+import 'package:example/src/not_found_screen.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
@@ -46,6 +47,7 @@ class _ExampleAppState extends State<ExampleApp> {
       pageBuilders: widget.pageBuilders,
       initialPage: widget.initialPage,
       reportPageUpdateToEngine: true,
+      notFoundPageFactory: notFoundPage,
     );
   }
 

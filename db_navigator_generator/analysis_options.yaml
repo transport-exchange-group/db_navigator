@@ -1,0 +1,12 @@
+include: package:flutter_code_style/analysis_options.yaml
+
+analyzer:
+  exclude:
+    - test/fixtures/**
+  errors:
+    # Pinned to the analyzer V1 element model until TEGFlutterApp can resolve
+    # analyzer 8 (research R2).
+    deprecated_member_use: ignore
+    # Internal build tool: no public API to document (constitution IV).
+    public_member_api_docs: ignore
+    package_api_docs: ignore

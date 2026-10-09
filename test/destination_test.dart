@@ -53,4 +53,52 @@ void main() {
       );
     },
   );
+
+  mapStateTests();
+}
+
+void mapStateTests() {
+  test('fromRouteInformation keeps a non-metadata Map state as arguments', () {
+    final Destination destination = Destination.fromRouteInformation(
+      RouteInformation(
+        uri: Uri.parse('/x'),
+        state: <Object?, Object?>{'id': 1},
+      ),
+    );
+
+    expect(destination.metadata.arguments, <Object?, Object?>{'id': 1});
+  });
+
+  test('fromRouteInformation keeps an invalid metadata Map as arguments', () {
+    final Destination destination = Destination.fromRouteInformation(
+      RouteInformation(
+        uri: Uri.parse('/x'),
+        state: <String, Object?>{'arguments': null},
+      ),
+    );
+
+    expect(
+        destination.metadata.arguments, <String, Object?>{'arguments': null});
+  });
+
+  test('fromRouteInformation accepts a Map state from the platform codec', () {
+    final Destination destination = Destination.fromRouteInformation(
+      RouteInformation(
+        uri: Uri.parse('/b'),
+        state: <Object?, Object?>{
+          'arguments': <Object?, Object?>{'name': 'Ada'},
+          'history': <Object?>[
+            <Object?, Object?>{
+              'path': '/a',
+              'metadata': <Object?, Object?>{},
+            },
+          ],
+        },
+      ),
+    );
+
+    expect(destination.path, '/b');
+    expect(destination.metadata.arguments, <String, Object?>{'name': 'Ada'});
+    expect(destination.metadata.history?.single.path, '/a');
+  });
 }

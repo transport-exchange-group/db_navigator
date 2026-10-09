@@ -1,6 +1,8 @@
 import 'package:db_navigator/src/destination_argument_converter.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'typed_route_utils.dart';
+
 void main() {
   test('JsonPojoConverter initializes once and then returns the same instance',
       () {
@@ -131,6 +133,8 @@ void main() {
       );
     },
   );
+
+  typedRouteTests();
 }
 
 class _Person implements HasToJson<Map<String, Object?>> {
@@ -159,4 +163,15 @@ class _Person implements HasToJson<Map<String, Object?>> {
       throw ArgumentError.value(json);
     }
   }
+}
+
+void typedRouteTests() {
+  test('pojoToJson returns a typed route toJson with no type-name key', () {
+    expect(
+      DestinationArgumentConverter.pojoToJson(
+        const GreetingRoute(name: 'Ada'),
+      ),
+      <String, Object?>{'name': 'Ada', 'times': 1},
+    );
+  });
 }

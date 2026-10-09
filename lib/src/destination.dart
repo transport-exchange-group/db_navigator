@@ -28,13 +28,54 @@ class Destination {
   factory Destination.fromRouteInformation(
     RouteInformation routeInformation,
   ) {
-    final Object? argument = routeInformation.state;
+    final Object? state = routeInformation.state;
+    final DestinationMetadata metadata;
+
+    if (state is DestinationMetadata) {
+      metadata = state;
+    } else {
+      metadata =
+          _metadataFromJson(state) ?? DestinationMetadata(arguments: state);
+    }
+
     return Destination(
       path: routeInformation.uri.toString(),
-      metadata: argument is DestinationMetadata
-          ? argument
-          : DestinationMetadata(arguments: argument),
+      metadata: metadata,
     );
+  }
+
+  static const Set<String> _metadataKeys = <String>{'arguments', 'history'};
+
+  static DestinationMetadata? _metadataFromJson(Object? state) {
+    if (state is! Map<Object?, Object?> ||
+        state.isEmpty ||
+        !state.keys.every(_metadataKeys.contains)) {
+      return null;
+    }
+
+    try {
+      return DestinationMetadata.fromJson(_jsonMap(state));
+    } on Object {
+      return null;
+    }
+  }
+
+  // The platform codec decodes restored maps as Map<Object?, Object?>.
+  static Map<String, Object?> _jsonMap(Map<Object?, Object?> map) {
+    return map.map(
+      (Object? key, Object? value) =>
+          MapEntry<String, Object?>(key.toString(), _jsonValue(value)),
+    );
+  }
+
+  static Object? _jsonValue(Object? value) {
+    if (value is Map<Object?, Object?>) {
+      return _jsonMap(value);
+    }
+    if (value is List<Object?>) {
+      return value.map(_jsonValue).toList();
+    }
+    return value;
   }
 
   /// Convert the current [Destination] to a [RouteInformation].
